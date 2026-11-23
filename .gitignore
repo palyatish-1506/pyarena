@@ -24,6 +24,11 @@ db.sqlite3
 backend/staticfiles/
 backend/media/
 
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+
 # OS / editors
 .DS_Store
 Thumbs.db

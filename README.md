@@ -50,6 +50,8 @@ to Django automatically.
 ```bash
 cd backend  && ruff check . && pytest
 cd frontend && npm run lint && npx tsc --noEmit && npm test
+npm run test:e2e        # Playwright (needs `npx playwright install chromium` once)
+npm run screenshots     # captures PR screenshots to docs/screenshots/
 ```
 
 ## Repo map

@@ -14,6 +14,8 @@
   `frontend/vercel.json`, GitHub Actions CI (ruff+pytest on PG service;
   eslint+tsc+vitest).
 - Docs: LEARNING.md, decisions/0001 (psycopg2 driver), README.
+- Playwright e2e (home page happy paths) + `npm run screenshots` for the
+  375px/1440px PR screenshots in docs/screenshots/.
 
 ### Notes
 - Local Postgres access pending credentials; verified with SQLite
