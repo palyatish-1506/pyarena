@@ -1,0 +1,35 @@
+# Render blueprint — backend web service.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: pyarena-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/v1/health/
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "false"
+      - key: ALLOWED_HOSTS
+        value: pyarena-api.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://pyarena-frontend.vercel.app
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://pyarena-frontend.vercel.app
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pyarena-db
+          property: connectionString
+      - key: SECURE_SSL_REDIRECT
+        value: "true"
+
+databases:
+  - name: pyarena-db
+    plan: free
+    databaseName: pyarena
+    user: pyarena
