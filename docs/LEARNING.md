@@ -150,15 +150,26 @@ automatically.
 
 ---
 
-## 7. JWT authentication (coming in Milestone 1)
+## 7. JWT authentication — cookie edition
 
-SimpleJWT issues two tokens: a short-lived **access token** (sent on every
-request) and a longer **refresh token** (used to get a new access token without
-re-login). The frontend will store them and attach
-`Authorization: Bearer <access>` via the central API client.
+SimpleJWT issues two tokens: a short-lived **access token** and a longer
+**refresh token**. We chose **httpOnly cookies** (ADR-0002) over
+localStorage + Bearer headers: the browser attaches cookies automatically,
+JavaScript can never read them, and XSS can't steal them.
 
-**Try it yourself (later):** `POST /api/v1/auth/token/` with email+password →
-get tokens → call a protected endpoint with the Bearer header.
+How it works in our code:
+- `accounts/views.py` — login/register validate credentials via SimpleJWT
+  serializers, then `accounts/cookies.py` sets `access_token` /
+  `refresh_token` as httpOnly cookies.
+- `accounts/authentication.py` — `CookieJWTAuthentication` teaches DRF to
+  read the JWT from the cookie (stock JWTAuthentication only reads headers).
+- `frontend/src/api/client.ts` — Axios uses `withCredentials: true`; a
+  response interceptor silently calls `/auth/refresh/` on 401 and retries.
+- `frontend/src/auth/AuthContext.tsx` — on app load it calls `/auth/me/`;
+  the cookie decides whether you're logged in. No tokens in JS memory.
+
+Prod wrinkle: vercel.app → onrender.com is **cross-site**, so cookies need
+`SameSite=None; Secure` (set in `settings/prod.py`); dev uses `SameSite=Lax`.
 
 ---
 
@@ -213,8 +224,32 @@ default — prod settings refuse to boot without it.
 
 ---
 
-## 12. ADRs — why psycopg2 instead of psycopg3
+## 12. ADRs
 
-See `docs/decisions/0001-psycopg2-driver.md`. Short version: this Windows
-machine's Application Control policy blocks psycopg3's C extension DLL;
-psycopg2-binary works everywhere we need it. Revisit if the policy changes.
+- `docs/decisions/0001-psycopg2-driver.md` — why psycopg2, not psycopg3.
+- `docs/decisions/0002-cookie-based-jwt.md` — why httpOnly cookies over
+  localStorage for JWT delivery.
+
+## 13. Zod + form validation (frontend)
+
+`frontend/src/auth/schemas.ts` defines Zod schemas — a TypeScript-first way
+to declare "what a valid form looks like" once, get both runtime validation
+and inferred types (`z.infer`). The auth pages call `schema.safeParse(form)`
+on submit; field errors map straight onto inputs. Backend still re-validates
+(DRF serializers) — client validation is UX, server validation is security.
+
+**Try it yourself:** add a `confirm` field rule to `registerSchema` and watch
+the type error guide you.
+
+## 14. The 401-refresh-retry interceptor
+
+`src/api/client.ts` intercepts every failed response. On 401 (and the request
+isn't already an auth endpoint), it POSTs `/auth/refresh/` — the browser
+attaches the refresh cookie automatically — then retries the original
+request once (`_retried` flag prevents loops). If refresh fails it fires a
+`pyarena:session-expired` window event that `AuthContext` listens for to log
+the user out. This is the standard "silent token refresh" pattern.
+
+**Try it yourself:** in devtools → Application → Cookies, delete
+`access_token`, reload, click something that calls the API — watch the
+Network tab show a refresh call followed by a successful retry.

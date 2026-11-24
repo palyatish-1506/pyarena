@@ -13,7 +13,8 @@ from config.views import health
 
 api_v1_patterns = [
     path("health/", health, name="health"),
-    # Future: path("auth/", include("accounts.urls")), etc.
+    path("auth/", include("accounts.urls")),
+    # Future: questions/, submissions/, leaderboard/, etc.
 ]
 
 urlpatterns = [
