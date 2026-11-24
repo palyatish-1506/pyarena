@@ -1,6 +1,8 @@
 # Changelog
 
-## [0.1.0] — Milestone 0: Foundation & walking skeleton
+## [0.1.0] — Milestone 0: Foundation & walking skeleton — DEPLOYED
+
+Live: API https://pyarena-api.onrender.com · Web https://pyarena-indol.vercel.app
 
 ### Added
 - Monorepo layout: `backend/` (Django `config` + 6 apps), `frontend/` (Vite +
@@ -16,6 +18,8 @@
 - Docs: LEARNING.md, decisions/0001 (psycopg2 driver), README.
 - Playwright e2e (home page happy paths) + `npm run screenshots` for the
   375px/1440px PR screenshots in docs/screenshots/.
+- Deploy: backend Dockerfile runs `migrate` on boot; render.yaml CORS/CSRF
+  point at the Vercel origin.
 
 ### Notes
 - Local Postgres access pending credentials; verified with SQLite
