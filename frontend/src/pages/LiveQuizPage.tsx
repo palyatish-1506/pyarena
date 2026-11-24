@@ -5,14 +5,37 @@ import { getAccessToken } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 
 /** Live quiz player screen (phone) + host controls when is_host. */
+interface QuizOption { id: number; text: string; order: number }
+interface LeaderRow { rank: number; name: string; score: number; correct: number }
+interface QuizQuestion {
+  id: number; index: number; total: number; time_limit: number;
+  title: string; body_markdown: string; code_snippet: string;
+  options: QuizOption[];
+}
+interface QuizMessage {
+  event: string;
+  role?: string;
+  quiz?: { code: string; title: string; status: string; current_index: number; question_count: number; time_limit: number };
+  question?: QuizQuestion;
+  index?: number; total?: number;
+  correct_option_ids?: number[];
+  explanation?: string;
+  scores?: { user_id: number; points: number; correct: boolean }[];
+  leaderboard?: LeaderRow[];
+}
+interface RoomInfo {
+  code: string; title: string; status: string; host_name: string;
+  player_count: number; players: LeaderRow[]; is_host: boolean;
+}
+
 export function LiveQuizPage() {
   const { code } = useParams();
   const [params] = useSearchParams();
   const joinCode = params.get("join") || code || "";
   const { user } = useAuth();
-  const [msg, setMsg] = useState<any>(null);
+  const [msg, setMsg] = useState<QuizMessage | null>(null);
   const [selected, setSelected] = useState<number[]>([]);
-  const [info, setInfo] = useState<any>(null);
+  const [info, setInfo] = useState<RoomInfo | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const startRef = useRef(Date.now());
 
@@ -31,7 +54,7 @@ export function LiveQuizPage() {
     const ws = new WebSocket(`${base}/ws/quiz/${joinCode}/?token=${token}`);
     wsRef.current = ws;
     ws.onmessage = (e) => {
-      const data = JSON.parse(e.data);
+      const data = JSON.parse(e.data) as QuizMessage;
       setMsg(data);
       if (data.event === "question") {
         setSelected([]);
@@ -43,7 +66,7 @@ export function LiveQuizPage() {
     };
   }
 
-  function send(action: string, extra: any = {}) {
+  function send(action: string, extra: Record<string, unknown> = {}) {
     wsRef.current?.send(JSON.stringify({ action, ...extra }));
   }
 
@@ -79,7 +102,7 @@ export function LiveQuizPage() {
         <div className="rounded-xl border border-surface-100 bg-white p-5">
           <h2 className="mb-3 text-lg font-bold">🏆 Final podium</h2>
           <ol className="space-y-2">
-            {finished.leaderboard?.map((p: any, i: number) => (
+            {finished.leaderboard?.map((p: LeaderRow, i: number) => (
               <li key={i} className="flex justify-between rounded-lg bg-surface-50 px-4 py-2">
                 <span>#{p.rank} {p.name}</span>
                 <span className="font-bold">{p.score} pts · {p.correct}✓</span>
@@ -103,7 +126,7 @@ export function LiveQuizPage() {
           <pre className="whitespace-pre-wrap text-sm">{q.body_markdown}</pre>
           {q.code_snippet && <pre className="rounded-lg bg-surface-900 p-3 text-sm text-white">{q.code_snippet}</pre>}
           <div className="space-y-2">
-            {q.options.map((o: any) => (
+            {q.options.map((o: QuizOption) => (
               <button
                 key={o.id}
                 onClick={() => setSelected([o.id])}
@@ -130,7 +153,7 @@ export function LiveQuizPage() {
       {state?.leaderboard && state.leaderboard.length > 0 && (
         <div className="rounded-xl border border-surface-100 bg-white p-4 text-sm">
           <p className="mb-2 font-semibold">Top players</p>
-          {state.leaderboard.slice(0, 5).map((p: any) => (
+          {state.leaderboard.slice(0, 5).map((p: LeaderRow) => (
             <p key={p.rank}>#{p.rank} {p.name} — {p.score}</p>
           ))}
         </div>
