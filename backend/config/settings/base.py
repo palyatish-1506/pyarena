@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     # Third party
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "corsheaders",
     # PyArena apps
@@ -123,9 +124,19 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": env("THROTTLE_ANON_RATE", default="100/hour"),
         "user": env("THROTTLE_USER_RATE", default="1000/hour"),
-        "login": env("THROTTLE_LOGIN_RATE", default="10/min"),
+        "login": env("THROTTLE_LOGIN_RATE", default="5/min"),
+        "register": env("THROTTLE_REGISTER_RATE", default="10/hour"),
     },
+    "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
 }
+
+# College roll-number format — configurable until the real format is confirmed.
+import re  # noqa: E402
+
+ROLL_NO_REGEX = re.compile(env("ROLL_NO_REGEX", default=r"^[A-Za-z0-9][A-Za-z0-9-]{2,19}$"))
+
+# Public frontend origin — used to build password-reset links.
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": datetime.timedelta(

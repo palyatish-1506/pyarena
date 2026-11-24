@@ -9,6 +9,8 @@ import { NotFoundPage } from "./pages/NotFoundPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { QuestionDetailPage } from "./pages/QuestionDetailPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SeniorDashboardPage } from "./pages/SeniorDashboardPage";
 
 export default function App() {
@@ -19,6 +21,8 @@ export default function App() {
         <Route path="leaderboard" element={<LeaderboardPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
+        <Route path="forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="reset-password" element={<ResetPasswordPage />} />
         <Route path="questions/:id" element={<QuestionDetailPage />} />
         <Route
           path="profile"

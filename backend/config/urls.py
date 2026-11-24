@@ -13,7 +13,9 @@ from config.views import health
 
 api_v1_patterns = [
     path("health/", health, name="health"),
+    path("me/", include("accounts.me_urls")),
     path("auth/", include("accounts.urls")),
+    path("admin/", include("accounts.admin_urls")),
     path("questions/", include("questions.urls")),
 ]
 

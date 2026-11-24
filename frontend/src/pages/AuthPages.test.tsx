@@ -28,6 +28,7 @@ describe("auth pages", () => {
     vi.restoreAllMocks();
     // /me fails -> anonymous user for all tests in this file.
     vi.spyOn(apiClient, "get").mockRejectedValue(new Error("no session"));
+    vi.spyOn(apiClient, "post").mockRejectedValue(new Error("no session"));
   });
 
   it("login shows field errors on empty submit", async () => {
@@ -56,7 +57,11 @@ describe("auth pages", () => {
     await user.type(screen.getByLabelText("Confirm password"), "different");
     await user.click(screen.getByRole("button", { name: "Sign up" }));
     expect(await screen.findByText("Passwords do not match")).toBeInTheDocument();
-    expect(postSpy).not.toHaveBeenCalled();
+    // Session-refresh may call /auth/refresh/ on mount — assert no REGISTER call.
+    expect(postSpy).not.toHaveBeenCalledWith(
+      "/api/v1/auth/register/",
+      expect.anything(),
+    );
   });
 
   it("protected route redirects anonymous users to /login", async () => {

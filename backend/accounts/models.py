@@ -48,6 +48,7 @@ class User(AbstractUser):
     division = models.CharField(max_length=10, blank=True)
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.STUDENT)
     senior_approved = models.BooleanField(default=False)
+    senior_requested = models.BooleanField(default=False)
 
     # Gamification (written by services in later milestones)
     xp = models.PositiveIntegerField(default=0)
