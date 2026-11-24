@@ -20,4 +20,5 @@ RUN SECRET_KEY=build-time-dummy DJANGO_SETTINGS_MODULE=config.settings.prod \
 
 EXPOSE 8000
 
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+# Apply migrations, then serve. migrate is idempotent — safe on every boot.
+CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3"]
