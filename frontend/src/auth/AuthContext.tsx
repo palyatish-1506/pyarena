@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { api, type RegisterPayload, type User } from "../api";
-import { setAccessToken } from "../api/client";
+import { refreshAccessToken, setAccessToken } from "../api/client";
 
 interface AuthState {
   user: User | null;
@@ -29,8 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Try refresh cookie -> new access token -> /me. Anonymous users just
     // end up logged out.
     try {
-      const { data } = await apiClientRefresh();
-      setAccessToken(data.access);
+      await refreshAccessToken();
       const me = await api.me();
       setUser(me.user);
     } catch {
@@ -79,11 +78,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-async function apiClientRefresh() {
-  const { apiClient } = await import("../api/client");
-  return apiClient.post<{ access: string }>("/api/v1/auth/refresh/");
 }
 
 export function useAuth(): AuthState {

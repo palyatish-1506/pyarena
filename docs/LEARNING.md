@@ -295,6 +295,38 @@ to a UTC ISO string for the API.
 **Try it yourself:** `python manage.py shell` →
 `from django.utils import timezone; print(timezone.now())` → always UTC.
 
+## 20. Transactions, race conditions & idempotency (Milestone 3)
+
+`submissions/services.py::submit_answer` wraps everything in
+`@transaction.atomic` and locks the user row with
+`User.objects.select_for_update().get(pk=...)`. Why: two simultaneous
+submits could both read `xp=0`, both add points, and lose an update —
+the row lock serializes them so XP/streak math is always consistent.
+
+**Idempotency:** `UNIQUE(user, question)` on Submission means a second
+attempt raises `IntegrityError` → we translate it to HTTP 409. The
+database is the final guard; the check-then-insert alone would race.
+
+**Scoring (spec §6):** correct = base (10/20/30) + speed bonus —
++50% of base if answered in the first 10% of the open window
+(release_at→close_at), decaying linearly to 0 at 50%. Wrong = 0,
+no negative marking. Late (after close_at) = practice: correct but 0
+points, still counts for the streak.
+
+**Streaks in IST:** `_ist_today()` converts `timezone.now()` to a
+fixed +5:30 date — streaks are IST *calendar days*, not 24h periods.
+Missed days are covered by `streak_freezes` (earned per 7-day streak,
+max 2) before the streak resets to 1.
+
+**Single-flight refresh (frontend bug found by e2e):** on page load,
+both AuthContext hydration and the axios 401-interceptor could call
+`/auth/refresh/` at once — the second used the just-rotated token and
+killed the session. `refreshAccessToken()` in `api/client.ts` dedupes
+concurrent calls into one promise.
+
+**Try it yourself:** submit the same question twice via curl — second
+call returns 409.
+
 ## 14. The 401-refresh-retry interceptor
 
 `src/api/client.ts` intercepts every failed response. On 401 (and the request

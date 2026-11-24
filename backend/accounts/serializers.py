@@ -67,6 +67,8 @@ class UserSerializer(serializers.ModelSerializer):
             "xp",
             "level",
             "current_streak",
+            "longest_streak",
+            "streak_freezes",
             "avatar_seed",
             "date_joined",
         ]
@@ -79,6 +81,8 @@ class UserSerializer(serializers.ModelSerializer):
             "xp",
             "level",
             "current_streak",
+            "longest_streak",
+            "streak_freezes",
             "date_joined",
         ]
 

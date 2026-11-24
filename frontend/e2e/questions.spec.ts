@@ -15,6 +15,7 @@ async function login(page: import("@playwright/test").Page, email: string, passw
 
 test.describe("question authoring", () => {
   test("senior schedules a question, student sees it after release", async ({ page, browser }) => {
+    test.setTimeout(90_000); // includes a real ~20s release wait
     const stamp = Date.now();
     const title = `E2E question ${stamp}`;
 

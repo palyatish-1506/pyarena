@@ -126,6 +126,7 @@ REST_FRAMEWORK = {
         "user": env("THROTTLE_USER_RATE", default="1000/hour"),
         "login": env("THROTTLE_LOGIN_RATE", default="5/min"),
         "register": env("THROTTLE_REGISTER_RATE", default="10/hour"),
+        "submit": env("THROTTLE_SUBMIT_RATE", default="30/min"),
     },
     "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
 }
@@ -135,9 +136,7 @@ REST_FRAMEWORK = {
 # division+roll format like BX123 / BY7 / BZ100 (division code + roll 1-100).
 import re  # noqa: E402
 
-ROLL_NO_REGEX = re.compile(
-    env("ROLL_NO_REGEX", default=r"^(\d{9}|[A-Za-z]{2}\d{1,3})$")
-)
+ROLL_NO_REGEX = re.compile(env("ROLL_NO_REGEX", default=r"^(\d{9}|[A-Za-z]{2}\d{1,3})$"))
 
 # Public frontend origin — used to build password-reset links.
 FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")

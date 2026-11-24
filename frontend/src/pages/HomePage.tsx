@@ -48,6 +48,20 @@ export function HomePage() {
       </div>
 
       {user && (
+        <div className="flex gap-3 text-sm">
+          <span className="rounded-full bg-primary-50 px-3 py-1 font-medium text-primary-700">
+            ⚡ {user.xp} XP
+          </span>
+          <span className="rounded-full bg-surface-100 px-3 py-1 font-medium">
+            Level {user.level}
+          </span>
+          <span className="rounded-full bg-accent-400/30 px-3 py-1 font-medium">
+            🔥 {user.current_streak}-day streak
+          </span>
+        </div>
+      )}
+
+      {user && (
         <div>
           <h2 className="mb-3 text-lg font-semibold">Today's Challenge</h2>
           {isLoading && <p className="text-sm text-surface-800/60">Loading questions…</p>}
