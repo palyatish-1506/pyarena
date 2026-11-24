@@ -9,10 +9,11 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from config.views import health
+from config.views import debug_sentry, health
 
 api_v1_patterns = [
     path("health/", health, name="health"),
+    path("debug-sentry/", debug_sentry, name="debug-sentry"),
     path("me/", include("accounts.me_urls")),
     path("leaderboard/", include("leaderboard.urls")),
     path("", include("community.urls")),
