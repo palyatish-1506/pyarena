@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, type StudentQuestion } from "../api";
 import { useAuth } from "../auth/AuthContext";
@@ -47,6 +48,8 @@ export function HomePage() {
         </p>
       </div>
 
+      {user && <JoinBox />}
+
       {user && (
         <div className="flex gap-3 text-sm">
           <span className="rounded-full bg-primary-50 px-3 py-1 font-medium text-primary-700">
@@ -87,5 +90,31 @@ export function HomePage() {
         )}
       </div>
     </section>
+  );
+}
+
+function JoinBox() {
+  const [code, setCode] = useState("");
+  const navigate = useNavigate();
+  return (
+    <form
+      className="flex items-center gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const c = code.trim().toUpperCase();
+        if (c) navigate(`/live/${c}`);
+      }}
+    >
+      <input
+        value={code}
+        onChange={(e) => setCode(e.target.value.toUpperCase())}
+        placeholder="6-char code"
+        maxLength={6}
+        className="w-28 rounded-lg border border-surface-200 px-3 py-1.5 text-center font-mono text-sm uppercase tracking-widest"
+      />
+      <button className="rounded-lg bg-primary-600 px-4 py-1.5 text-sm font-medium text-white">
+        Join live quiz
+      </button>
+    </form>
   );
 }
