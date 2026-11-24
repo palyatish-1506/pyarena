@@ -143,7 +143,7 @@ export const api = {
 
   // ---- Questions: senior ----
   seniorQuestions: async (status?: string): Promise<SeniorQuestion[]> => {
-    const { data } = await apiClient.get<SeniorQuestion[]>(
+    const { data } = await apiClient.get<SeniorQuestion[] | { results: SeniorQuestion[] }>(
       "/api/v1/questions/senior/questions/",
       { params: status ? { status } : {} },
     );
