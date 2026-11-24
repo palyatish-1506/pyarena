@@ -9,3 +9,7 @@ whitenoise>=6.8
 gunicorn>=23.0
 django-anymail[brevo]==12.0
 sentry-sdk[django]==2.35.0
+channels>=4.1
+channels-redis>=4.2
+uvicorn[standard]>=0.30
+daphne>=4.1

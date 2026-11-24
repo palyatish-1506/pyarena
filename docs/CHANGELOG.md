@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased] — Milestone 7: Kahoot-style live quiz
+
+### Added
+- livequiz app: LiveQuiz (6-digit code, lobby→live→reveal→finished),
+  LiveQuizParticipant, LiveQuizAnswer (UNIQUE per question, first wins)
+- Django Channels QuizConsumer: JWT auth via ?token=, host controls
+  (start/next/reveal/end), server-scheduled auto-reveal + manual reveal,
+  scoring at reveal (correct=exact set, faster=more points), live
+  leaderboard broadcasts
+- REST: POST /live/create (senior), GET /live/<code>/, GET /live/mine/
+- ASGI ProtocolTypeRouter (http+websocket); CHANNEL_LAYERS Redis when
+  REDIS_URL set else InMemory; deps: channels, channels-redis, daphne,
+  uvicorn
+- Frontend /live/:code player+host screen (join, answer, reveal, podium)
+- C1: 3-client full-quiz pytest passes
+
+
 ## [Unreleased] — Milestone 5: Badges, levels UI & doubt comments
 
 ### Added

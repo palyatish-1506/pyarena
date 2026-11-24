@@ -15,6 +15,7 @@ api_v1_patterns = [
     path("health/", health, name="health"),
     path("me/", include("accounts.me_urls")),
     path("leaderboard/", include("leaderboard.urls")),
+    path("live/", include("livequiz.urls")),
     path("", include("community.urls")),
     path("auth/", include("accounts.urls")),
     path("admin/", include("accounts.admin_urls")),

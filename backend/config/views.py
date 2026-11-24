@@ -17,4 +17,3 @@ def health(request):
         db_status = "error"
     status = "ok" if db_status == "ok" else "degraded"
     return JsonResponse({"status": status, "db": db_status})
-

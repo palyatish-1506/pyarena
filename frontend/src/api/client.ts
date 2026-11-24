@@ -23,6 +23,11 @@ export function setAccessToken(token: string | null) {
   accessToken = token;
 }
 
+/** Read the in-memory access token (for WebSocket auth). */
+export function getAccessToken(): string | null {
+  return accessToken;
+}
+
 /**
  * Single-flight refresh: concurrent callers share ONE /auth/refresh/ call.
  * Without this, page hydration (AuthContext) and a 401 interceptor can
