@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased] — Milestone 1: Authentication
+
+### Added
+- Backend: `accounts/services.py` (register_user), `serializers.py`,
+  `authentication.py` (CookieJWTAuthentication), `cookies.py`, `views.py`,
+  `urls.py` — endpoints `POST /api/v1/auth/register|login|refresh|logout`,
+  `GET /api/v1/auth/me/`. Tokens delivered as httpOnly cookies (ADR-0002).
+- Cookie flags env-configurable; prod forces `SameSite=None; Secure`.
+- DRF default auth switched to cookie JWT; login endpoint throttled
+  (`THROTTLE_LOGIN_RATE`).
+- Frontend: Axios `withCredentials` + silent-refresh interceptor, `AuthProvider`
+  context, Zod schemas, `/login` + `/register` pages, `ProtectedRoute`,
+  `/profile` page, auth-aware nav.
+- Tests: 7 backend auth tests, 3 vitest auth tests, Playwright register→
+  profile→logout e2e.
+- Docs: ADR-0002, LEARNING.md §7/§13/§14.
+
 ## [0.1.0] — Milestone 0: Foundation & walking skeleton — DEPLOYED
 
 Live: API https://pyarena-api.onrender.com · Web https://pyarena-indol.vercel.app

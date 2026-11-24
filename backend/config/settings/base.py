@@ -111,7 +111,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --- DRF ---
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
+    # Cookie-based JWT auth (ADR-0002) — reads access_token cookie.
+    "DEFAULT_AUTHENTICATION_CLASSES": ("accounts.authentication.CookieJWTAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticatedOrReadOnly",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     # Spec: rate-limit login/submit endpoints (throttle classes wired per-view).
@@ -148,6 +149,12 @@ SPECTACULAR_SETTINGS = {
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS")
+
+# --- Auth cookies (ADR-0002) ---
+JWT_AUTH_COOKIE = "access_token"
+JWT_AUTH_REFRESH_COOKIE = "refresh_token"
+JWT_AUTH_COOKIE_SAMESITE = env("JWT_COOKIE_SAMESITE", default="Lax")
+JWT_AUTH_COOKIE_SECURE = env.bool("JWT_COOKIE_SECURE", default=False)
 
 # --- Email (console backend in dev; wire a real provider in prod) ---
 EMAIL_BACKEND = env(
