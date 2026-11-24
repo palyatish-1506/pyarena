@@ -17,3 +17,13 @@ def health(request):
         db_status = "error"
     status = "ok" if db_status == "ok" else "degraded"
     return JsonResponse({"status": status, "db": db_status})
+
+
+def debug_sentry(request):
+    """GET /api/v1/debug-sentry/ -> deliberately raises to verify Sentry.
+
+    Staff-only; remove after C3 verification.
+    """
+    if not request.user.is_staff:
+        return JsonResponse({"detail": "staff only"}, status=403)
+    raise RuntimeError("Sentry test error — safe to ignore")
