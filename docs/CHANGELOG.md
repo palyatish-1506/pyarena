@@ -1,5 +1,24 @@
 # Changelog
 
+## [Unreleased] — Milestone 2: Question authoring
+
+### Added
+- Backend: `Topic`/`Question`/`Option` models + indexes `(status,release_at)`,
+  `(topic,difficulty)`; `services.py` (validation, create/duplicate,
+  query-time visibility, deterministic per-user shuffle);
+  `StudentQuestionSerializer` that structurally cannot leak answers;
+  `IsSeniorOrAdmin` permission; endpoints `/api/v1/questions/{today,topics,{id}}`
+  and `/api/v1/questions/senior/questions` CRUD + duplicate + preview.
+- `seed_topics` (13 topics, 34 questions) and `seed_demo` (senior+student).
+- Frontend: `/senior` dashboard (builder with markdown+code+options editor,
+  IST schedule picker, live student preview, status-filtered list,
+  duplicate), Today's Challenge on Home, `/questions/:id` detail with
+  option selection, `CodeBlock` (Prism Python highlighting), `Markdown`
+  renderer, `lib/time.ts` IST↔UTC helpers, `SeniorOnly` route guard.
+- Tests: 15 pytest (leak-proof, scheduling, validation, shuffle,
+  permissions, duplicate, preview) + Playwright senior→schedule→student e2e.
+- C4 timing: senior dashboard → saved draft in **0.4s** (target <60s).
+
 ## [Unreleased] — Milestone 1: Authentication
 
 ### Added

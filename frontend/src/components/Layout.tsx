@@ -26,6 +26,11 @@ export function Layout() {
             {!loading &&
               (user ? (
                 <>
+                  {(user.role === "senior" || user.role === "admin") && (
+                    <NavLink to="/senior" className={navLinkClass}>
+                      Senior
+                    </NavLink>
+                  )}
                   <NavLink to="/profile" className={navLinkClass}>
                     {user.full_name || user.email}
                   </NavLink>
