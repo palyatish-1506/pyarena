@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased] — Milestone 5: Badges, levels UI & doubt comments
+
+### Added
+- Badge engine (gamification/services.py): 8 badges per spec §6 —
+  first_answer, streak_7/30, first_hard_correct, perfect_week, night_owl,
+  helper_10, top10_weekly; idempotent get_or_create awarding evaluated
+  after every submission/comment.
+- community app: threaded (1-level) comments under questions, gated 403
+  until the user submits; upvotes, senior "accepted answer", report
+  button, admin is_hidden, COMMENT_BAD_WORDS profanity filter.
+- Frontend: comments section on question page (post-submit), badge
+  gallery on profile, level-up modal on submit, badges in /me/badges.
+- Tests: badge rules + level thresholds + comment gating/flow/profanity;
+  e2e extended: submit -> first_answer badge on profile.
+
+
 ## [Unreleased] — Milestone 3: Answering, scoring & explanations
 
 ### Added

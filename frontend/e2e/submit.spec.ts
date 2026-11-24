@@ -60,4 +60,8 @@ test("student answers -> explanation -> XP on home", async ({ page }) => {
   // Home shows updated XP (> 0).
   await page.goto("/");
   await expect(page.getByText(/\d+ XP/)).toBeVisible();
+
+  // Profile shows the first_answer badge (C3).
+  await page.goto("/profile");
+  await expect(page.getByText("First Answer")).toBeVisible();
 });

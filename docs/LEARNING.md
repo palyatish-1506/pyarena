@@ -339,3 +339,26 @@ the user out. This is the standard "silent token refresh" pattern.
 **Try it yourself:** in devtools → Application → Cookies, delete
 `access_token`, reload, click something that calls the API — watch the
 Network tab show a refresh call followed by a successful retry.
+
+## 21. Badge engine & comment gating (Milestone 5)
+
+**Event-driven within a monolith:** `gamification/services.py` exposes
+`evaluate_after_submission()` / `evaluate_after_comment()` — pure
+functions called from the submission/comment services, never views.
+Adding a new trigger = one call site, rules stay centralized.
+
+**Idempotent awarding:** `UserBadge` has UNIQUE(user,badge) and we use
+`get_or_create` — re-evaluating after every event can never double-award.
+Badge catalog rows are created lazily via `ensure_badges()`.
+
+**Comment gating (anti-cheat):** `GET/POST /questions/{id}/comments/`
+returns 403 until the user has a Submission for that question — you can't
+read discussions (which may hint at answers) before answering. The
+question author and staff bypass for moderation.
+
+**Moderation basics:** comments have `upvotes`, `is_accepted` (senior
+only, question author), `is_hidden` (admin), `report_count`. Profanity
+filter via `COMMENT_BAD_WORDS` env (comma-separated) checked server-side.
+
+**Try it yourself:** answer a question -> `first_answer` badge appears on
+/profile; comment before submitting -> 403.

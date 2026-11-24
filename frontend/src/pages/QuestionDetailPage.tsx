@@ -3,10 +3,13 @@ import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import confetti from "canvas-confetti";
 import { api, type SubmitResult } from "../api";
+import { useAuth } from "../auth/AuthContext";
 import { CodeBlock } from "../components/CodeBlock";
+import { CommentsSection } from "../components/CommentsSection";
 import { Markdown } from "../components/Markdown";
 
 export function QuestionDetailPage() {
+  const { user } = useAuth();
   const { id } = useParams();
   const questionId = Number(id);
   const { data: q, isLoading, isError } = useQuery({
@@ -16,6 +19,7 @@ export function QuestionDetailPage() {
   });
   const [selected, setSelected] = useState<number[]>([]);
   const [result, setResult] = useState<SubmitResult | null>(null);
+  const [prevLevel, setPrevLevel] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const startRef = useRef(Date.now());
@@ -59,6 +63,7 @@ export function QuestionDetailPage() {
     setSubmitting(true);
     setSubmitError("");
     try {
+      setPrevLevel(user?.level ?? null);
       const res = await api.submitAnswer(questionId, selected, Date.now() - startRef.current);
       setResult(res);
     } catch (e) {
@@ -84,6 +89,26 @@ export function QuestionDetailPage() {
       <h1 className="text-2xl font-bold">{q.title}</h1>
       <Markdown text={q.body_markdown} />
       {q.code_snippet && <CodeBlock code={q.code_snippet} />}
+
+      {result && <CommentsSection questionId={questionId} />}
+
+      {result && prevLevel !== null && result.new_level > prevLevel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="rounded-2xl bg-white p-8 text-center shadow-xl">
+            <p className="text-4xl">🎉</p>
+            <h2 className="mt-2 text-xl font-bold">Level up!</h2>
+            <p className="mt-1 text-surface-800/70">
+              You're now <strong>Level {result.new_level} — {result.level_name}</strong>
+            </p>
+            <button
+              onClick={() => setPrevLevel(result.new_level)}
+              className="mt-4 rounded-lg bg-primary-600 px-6 py-2 font-medium text-white hover:bg-primary-700"
+            >
+              Keep going
+            </button>
+          </div>
+        </div>
+      )}
 
       {result ? (
         <ResultPanel result={result} />

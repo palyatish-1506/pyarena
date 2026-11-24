@@ -29,20 +29,13 @@ LEVELS = [
     (3000, "Pythonista"),
 ]
 
-BADGES = {
-    "first_answer": "Answered your first question",
-    "streak_7": "7-day streak",
-    "streak_30": "30-day streak",
-    "first_hard_correct": "First hard question correct",
-}
-
 
 def _ist_today():
     """Today's date in Asia/Kolkata (spec: streaks are IST calendar days)."""
     return timezone.localtime(timezone.now(), timezone.get_fixed_timezone(330)).date()
 
 
-def _level_for(xp: int) -> int:
+def level_for(xp: int) -> int:
     level = 1
     for i, (threshold, _) in enumerate(LEVELS):
         if xp >= threshold:
@@ -99,24 +92,6 @@ def _update_streak(user: User, today) -> int:
     return streak
 
 
-def _badges_for(user: User, submission: Submission) -> list[str]:
-    earned = []
-    if not user.submissions.exclude(pk=submission.pk).exists():
-        earned.append("first_answer")
-    if submission.is_correct and submission.question.difficulty == Question.Difficulty.HARD:
-        if (
-            not user.submissions.filter(is_correct=True, question__difficulty="hard")
-            .exclude(pk=submission.pk)
-            .exists()
-        ):
-            earned.append("first_hard_correct")
-    if user.current_streak == 7:
-        earned.append("streak_7")
-    if user.current_streak == 30:
-        earned.append("streak_30")
-    return [b for b in earned if b in BADGES]
-
-
 class DuplicateSubmission(Exception):
     pass
 
@@ -160,10 +135,14 @@ def submit_answer(
         locked_user.xp += points
     today = _ist_today()
     streak = _update_streak(locked_user, today)
-    new_level = _level_for(locked_user.xp)
-    badges = _badges_for(locked_user, submission)
+    new_level = level_for(locked_user.xp)
     locked_user.level = new_level
     locked_user.save()
+
+    # Badge engine (spec §6) — evaluated after every submission, idempotent.
+    from gamification.services import evaluate_after_submission
+
+    badges = evaluate_after_submission(locked_user, submission)
 
     return {
         "is_correct": submission.is_correct,
