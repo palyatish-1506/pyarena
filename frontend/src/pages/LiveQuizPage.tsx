@@ -114,7 +114,7 @@ export function LiveQuizPage() {
 
       {reveal && !finished && (
         <div className="rounded-xl border border-success-500/30 bg-success-500/10 p-5">
-          <p className="font-semibold">Answer: {[...reveal.correct_option_ids].join(", ")}</p>
+          <p className="font-semibold">Answer: {[...(reveal.correct_option_ids ?? [])].join(", ")}</p>
           {reveal.explanation && <p className="mt-2 text-sm">{reveal.explanation}</p>}
         </div>
       )}
