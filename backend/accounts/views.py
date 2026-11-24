@@ -74,8 +74,16 @@ class RefreshView(APIView):
         raw = request.COOKIES.get(settings.JWT_AUTH_REFRESH_COOKIE)
         if not raw:
             return Response({"detail": "No refresh token."}, status=status.HTTP_401_UNAUTHORIZED)
-        serializer = TokenRefreshSerializer(data={"refresh": raw})
-        serializer.is_valid(raise_exception=True)
+        from rest_framework_simplejwt.exceptions import TokenError
+
+        try:
+            serializer = TokenRefreshSerializer(data={"refresh": raw})
+            serializer.is_valid(raise_exception=True)
+        except TokenError:
+            return Response(
+                {"detail": "Invalid or expired refresh token."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
         response = Response({"access": serializer.validated_data["access"]})
         if "refresh" in serializer.validated_data:  # rotation enabled
             response = set_refresh_cookie(response, serializer.validated_data["refresh"])
