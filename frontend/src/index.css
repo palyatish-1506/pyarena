@@ -1,0 +1,32 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* PyArena palette — spec §8: Python blue + yellow, WCAG AA */
+  --color-primary-50: #eef6fb;
+  --color-primary-100: #d9ecf7;
+  --color-primary-200: #b3d9ef;
+  --color-primary-300: #84bde2;
+  --color-primary-400: #5599cf;
+  --color-primary-500: #3776ab;
+  --color-primary-600: #2b5f8c;
+  --color-primary-700: #254d72;
+  --color-primary-800: #1f3d5a;
+  --color-primary-900: #183041;
+
+  --color-accent-300: #ffe066;
+  --color-accent-400: #ffd43b;
+  --color-accent-500: #f0b90b;
+
+  --color-success-500: #16a34a;
+  --color-error-500: #dc2626;
+
+  --color-surface-50: #f8fafc;
+  --color-surface-100: #f1f5f9;
+  --color-surface-200: #e2e8f0;
+  --color-surface-800: #1e293b;
+  --color-surface-900: #0f172a;
+}

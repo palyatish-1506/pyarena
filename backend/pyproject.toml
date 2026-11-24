@@ -1,0 +1,22 @@
+[project]
+name = "pyarena-backend"
+version = "0.1.0"
+description = "PyArena backend — Django + DRF + PostgreSQL"
+requires-python = ">=3.12"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 110
+src = ["."]
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "DJ"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["accounts", "questions", "submissions", "leaderboard", "gamification", "community", "config"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.dev"
+python_files = ["test_*.py"]
+addopts = "-q"
