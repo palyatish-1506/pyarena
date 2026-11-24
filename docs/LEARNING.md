@@ -362,3 +362,30 @@ filter via `COMMENT_BAD_WORDS` env (comma-separated) checked server-side.
 
 **Try it yourself:** answer a question -> `first_answer` badge appears on
 /profile; comment before submitting -> 403.
+
+## 22. Production readiness (Milestone 6)
+
+**Observability:** Sentry SDKs (backend `sentry-sdk[django]`, frontend
+`@sentry/react`) init only when `SENTRY_DSN`/`VITE_SENTRY_DSN` is set —
+no DSN, no overhead, no crash. Every request gets an `X-Request-ID`
+(middleware) echoed in the response and logged as structured JSON —
+correlate a user's screenshot with backend logs/Sentry in seconds.
+
+**SLOs:** our informal targets — p95 API < 800ms, error rate < 1%,
+uptime "good enough" for a weekly quiz. Load tests verify them before
+events (see docs/load-tests/).
+
+**Security headers:** prod.py sets HSTS (1yr+preload), SSL redirect,
+Secure+SameSite=None JWT cookies, nosniff, X-Frame-Options DENY.
+`manage.py check --deploy` must stay warning-free (C1).
+
+**Backups:** Render Postgres auto-backups daily; RUNBOOK.md has the
+restore drill — we verified a dump→restore→migrate cycle locally.
+Always drill *before* you need it.
+
+**Load testing:** Locust simulates 450 students hammering
+submit/leaderboard simultaneously — finds bottlenecks (DB connections,
+thundering herd on refresh) before real users do.
+
+**CSV exports:** staff-only `/api/v1/admin/users.csv` +
+`weekly-results.csv` — streaming HttpResponse, no pandas needed.
