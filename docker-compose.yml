@@ -7,7 +7,10 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-pyarena}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pyarena}
     ports:
-      - "5432:5432"
+      # Host port 5433 (not 5432) because a local PostgreSQL 18 install already
+      # owns 5432 on this machine. If you remove the local install, you can
+      # switch this back to "5432:5432" and update DATABASE_URL to match.
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

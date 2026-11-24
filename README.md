@@ -11,7 +11,7 @@ Prereqs: Python 3.12+, Node 20+, Docker Desktop (for Postgres).
 ### 1. Database
 
 ```bash
-docker compose up -d          # starts Postgres 16 on :5432
+docker compose up -d          # starts Postgres 16 on host port 5433
 docker compose ps             # wait for "healthy"
 ```
 
