@@ -1,5 +1,6 @@
 """Serializers for the accounts app."""
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
@@ -8,8 +9,6 @@ User = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    """Validates sign-up payloads, then delegates creation to services."""
-
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password_confirm = serializers.CharField(write_only=True)
 
@@ -33,6 +32,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             "division": {"required": False, "allow_blank": True},
         }
 
+    def validate_roll_no(self, value):
+        if value and not settings.ROLL_NO_REGEX.match(value):
+            raise serializers.ValidationError("Roll number format is invalid (expected e.g. CS23A001).")
+        return value
+
     def validate(self, attrs):
         if attrs["password"] != attrs.pop("password_confirm"):
             raise serializers.ValidationError({"password_confirm": "Passwords do not match."})
@@ -45,7 +49,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Public profile shape returned by /auth/me/ and embedded in auth responses."""
+    """Readable profile + writable profile fields for PATCH /me."""
 
     class Meta:
         model = User
@@ -53,14 +57,32 @@ class UserSerializer(serializers.ModelSerializer):
             "id",
             "email",
             "full_name",
-            "role",
-            "division",
-            "year",
+            "roll_no",
             "branch",
+            "year",
+            "division",
+            "role",
+            "senior_approved",
+            "senior_requested",
             "xp",
             "level",
             "current_streak",
             "avatar_seed",
             "date_joined",
         ]
-        read_only_fields = fields
+        read_only_fields = [
+            "id",
+            "email",
+            "role",
+            "senior_approved",
+            "senior_requested",
+            "xp",
+            "level",
+            "current_streak",
+            "date_joined",
+        ]
+
+    def validate_roll_no(self, value):
+        if value and not settings.ROLL_NO_REGEX.match(value):
+            raise serializers.ValidationError("Roll number format is invalid.")
+        return value

@@ -85,6 +85,11 @@ export function LoginPage() {
         </button>
       </form>
       <p className="text-sm text-surface-800/70">
+        <Link to="/forgot-password" className="text-primary-600 underline">
+          Forgot password?
+        </Link>
+      </p>
+      <p className="text-sm text-surface-800/70">
         No account?{" "}
         <Link to="/register" className="text-primary-600 underline">
           Register

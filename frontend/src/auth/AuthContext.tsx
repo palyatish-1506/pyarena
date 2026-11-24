@@ -8,14 +8,15 @@ import {
   type ReactNode,
 } from "react";
 import { api, type RegisterPayload, type User } from "../api";
+import { setAccessToken } from "../api/client";
 
 interface AuthState {
   user: User | null;
-  /** True until the initial /me check resolves. */
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
+  refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -24,44 +25,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Hydrate session on mount: the httpOnly cookie either exists or it doesn't.
-  useEffect(() => {
-    api
-      .me()
-      .then(setUser)
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+  const refreshSession = useCallback(async () => {
+    // Try refresh cookie -> new access token -> /me. Anonymous users just
+    // end up logged out.
+    try {
+      const { data } = await apiClientRefresh();
+      setAccessToken(data.access);
+      const me = await api.me();
+      setUser(me.user);
+    } catch {
+      setAccessToken(null);
+      setUser(null);
+    }
   }, []);
 
-  // If a token refresh fails anywhere, the interceptor emits this event.
   useEffect(() => {
-    const onExpired = () => setUser(null);
+    void refreshSession().finally(() => setLoading(false));
+  }, [refreshSession]);
+
+  useEffect(() => {
+    const onExpired = () => {
+      setAccessToken(null);
+      setUser(null);
+    };
     window.addEventListener("pyarena:session-expired", onExpired);
     return () => window.removeEventListener("pyarena:session-expired", onExpired);
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    setUser(await api.login(email, password));
+    const res = await api.login(email, password);
+    setAccessToken(res.access);
+    setUser(res.user);
   }, []);
 
   const register = useCallback(async (payload: RegisterPayload) => {
-    setUser(await api.register(payload));
+    const res = await api.register(payload);
+    setAccessToken(res.access);
+    setUser(res.user);
   }, []);
 
   const logout = useCallback(async () => {
     try {
       await api.logout();
     } finally {
+      setAccessToken(null);
       setUser(null);
     }
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout }),
-    [user, loading, login, register, logout],
+    () => ({ user, loading, login, register, logout, refreshSession }),
+    [user, loading, login, register, logout, refreshSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+async function apiClientRefresh() {
+  const { apiClient } = await import("../api/client");
+  return apiClient.post<{ access: string }>("/api/v1/auth/refresh/");
 }
 
 export function useAuth(): AuthState {

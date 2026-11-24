@@ -9,15 +9,23 @@ export interface User {
   id: number;
   email: string;
   full_name: string;
-  role: "student" | "senior" | "admin";
-  division: string;
-  year: number | null;
+  roll_no: string;
   branch: string;
+  year: number | null;
+  division: string;
+  role: "student" | "senior" | "admin";
+  senior_approved: boolean;
+  senior_requested: boolean;
   xp: number;
   level: number;
   current_streak: number;
   avatar_seed: string;
   date_joined: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  access: string;
 }
 
 export interface RegisterPayload {
@@ -29,6 +37,15 @@ export interface RegisterPayload {
   branch?: string;
   year?: number | null;
   division?: string;
+}
+
+export interface ProfilePatch {
+  full_name?: string;
+  roll_no?: string;
+  branch?: string;
+  year?: number | null;
+  division?: string;
+  avatar_seed?: string;
 }
 
 export interface Topic {
@@ -95,7 +112,6 @@ export interface QuestionPayload {
   explanation_markdown?: string;
   release_at?: string | null;
   close_at?: string | null;
-  status?: string;
   options_input: { text: string; is_correct: boolean }[];
 }
 
@@ -105,13 +121,13 @@ export const api = {
     return data;
   },
 
-  register: async (payload: RegisterPayload): Promise<User> => {
-    const { data } = await apiClient.post<User>("/api/v1/auth/register/", payload);
+  register: async (payload: RegisterPayload): Promise<AuthResponse> => {
+    const { data } = await apiClient.post<AuthResponse>("/api/v1/auth/register/", payload);
     return data;
   },
 
-  login: async (email: string, password: string): Promise<User> => {
-    const { data } = await apiClient.post<User>("/api/v1/auth/login/", {
+  login: async (email: string, password: string): Promise<AuthResponse> => {
+    const { data } = await apiClient.post<AuthResponse>("/api/v1/auth/login/", {
       email,
       password,
     });
@@ -122,8 +138,30 @@ export const api = {
     await apiClient.post("/api/v1/auth/logout/");
   },
 
-  me: async (): Promise<User> => {
-    const { data } = await apiClient.get<User>("/api/v1/auth/me/");
+  me: async (): Promise<{ user: User }> => {
+    const { data } = await apiClient.get<{ user: User }>("/api/v1/me/");
+    return data;
+  },
+
+  updateMe: async (patch: ProfilePatch): Promise<{ user: User }> => {
+    const { data } = await apiClient.patch<{ user: User }>("/api/v1/me/", patch);
+    return data;
+  },
+
+  forgotPassword: async (email: string): Promise<void> => {
+    await apiClient.post("/api/v1/auth/password-reset/", { email });
+  },
+
+  resetPassword: async (uid: string, token: string, new_password: string): Promise<void> => {
+    await apiClient.post("/api/v1/auth/password-reset/confirm/", {
+      uid,
+      token,
+      new_password,
+    });
+  },
+
+  requestSenior: async (): Promise<{ user: User }> => {
+    const { data } = await apiClient.post<{ user: User }>("/api/v1/auth/request-senior/");
     return data;
   },
 

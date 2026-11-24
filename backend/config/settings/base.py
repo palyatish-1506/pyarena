@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     # Third party
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "corsheaders",
     # PyArena apps
@@ -123,9 +124,23 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": env("THROTTLE_ANON_RATE", default="100/hour"),
         "user": env("THROTTLE_USER_RATE", default="1000/hour"),
-        "login": env("THROTTLE_LOGIN_RATE", default="10/min"),
+        "login": env("THROTTLE_LOGIN_RATE", default="5/min"),
+        "register": env("THROTTLE_REGISTER_RATE", default="10/hour"),
     },
+    "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
 }
+
+# College roll-number format — configurable until the real format is confirmed.
+# College identifiers: 9-digit enrollment number (e.g. 250002061) OR a
+# division+roll format like BX123 / BY7 / BZ100 (division code + roll 1-100).
+import re  # noqa: E402
+
+ROLL_NO_REGEX = re.compile(
+    env("ROLL_NO_REGEX", default=r"^(\d{9}|[A-Za-z]{2}\d{1,3})$")
+)
+
+# Public frontend origin — used to build password-reset links.
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": datetime.timedelta(
@@ -156,8 +171,18 @@ JWT_AUTH_REFRESH_COOKIE = "refresh_token"
 JWT_AUTH_COOKIE_SAMESITE = env("JWT_COOKIE_SAMESITE", default="Lax")
 JWT_AUTH_COOKIE_SECURE = env.bool("JWT_COOKIE_SECURE", default=False)
 
-# --- Email (console backend in dev; wire a real provider in prod) ---
+# --- Email ---
+# Dev default: console backend (links print to runserver logs).
+# Prod (Resend SMTP): set EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+# plus EMAIL_HOST=smtp.resend.com, EMAIL_PORT=587, EMAIL_HOST_USER=resend,
+# EMAIL_HOST_PASSWORD=<resend api key>, EMAIL_USE_TLS=True.
 EMAIL_BACKEND = env(
     "EMAIL_BACKEND",
     default="django.core.mail.backends.console.EmailBackend",
 )
+EMAIL_HOST = env("EMAIL_HOST", default="localhost")
+EMAIL_PORT = env.int("EMAIL_PORT", default=25)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=False)
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="PyArena <noreply@pyarena.local>")
