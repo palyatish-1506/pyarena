@@ -187,4 +187,10 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=False)
 EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
 EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
+
+# Anymail (HTTPS API providers — works where SMTP ports are blocked).
+# Prod: EMAIL_BACKEND=anymail.backends.brevo.EmailBackend + ANYMAIL_API_KEY.
+ANYMAIL = {
+    "BREVO_API_KEY": env("ANYMAIL_API_KEY", default=""),
+}
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="PyArena <noreply@pyarena.local>")

@@ -7,3 +7,4 @@ django-cors-headers>=4.4
 psycopg2-binary>=2.9
 whitenoise>=6.8
 gunicorn>=23.0
+django-anymail[brevo]==12.0
