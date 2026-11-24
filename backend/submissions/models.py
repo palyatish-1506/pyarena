@@ -21,7 +21,11 @@ class Submission(models.Model):
             models.UniqueConstraint(fields=["user", "question"], name="unique_submission_per_user_question")
         ]
         ordering = ["-submitted_at"]
-        indexes = [models.Index(fields=["user", "-submitted_at"])]
+        indexes = [
+            models.Index(fields=["user", "-submitted_at"]),
+            # Leaderboard aggregation scans by time window + user.
+            models.Index(fields=["submitted_at", "user"]),
+        ]
 
     def __str__(self):
         return f"{self.user_id}:{self.question_id} {'✓' if self.is_correct else '✗'}"
