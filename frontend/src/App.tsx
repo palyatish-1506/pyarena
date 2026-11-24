@@ -3,7 +3,7 @@ import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { SeniorOnly } from "./components/SeniorOnly";
 import { HomePage } from "./pages/HomePage";
-import { LeaderboardPage } from "./pages/LeaderboardPage";
+import { LeaderboardsPage } from "./pages/LeaderboardsPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { ProfilePage } from "./pages/ProfilePage";
@@ -19,7 +19,7 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
-        <Route path="leaderboard" element={<LeaderboardPage />} />
+        <Route path="leaderboard" element={<LeaderboardsPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="forgot-password" element={<ForgotPasswordPage />} />
