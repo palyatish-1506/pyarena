@@ -13,7 +13,6 @@ import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SeniorDashboardPage } from "./pages/SeniorDashboardPage";
 import { HistoryPage } from "./pages/HistoryPage";
-import { LeaderboardsPage } from "./pages/LeaderboardsPage";
 
 export default function App() {
   return (

@@ -20,7 +20,6 @@ interface Row {
   avatar_seed: string;
   level: number;
   division?: string;
-  division?: string;
   total_points?: number;
   active_members?: number;
   avg_per_member?: number;
