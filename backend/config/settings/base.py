@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "questions",
     "submissions",
     "leaderboard",
+    "livequiz",
     "gamification",
     "community",
 ]
@@ -216,6 +217,17 @@ EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
 ANYMAIL = {
     "BREVO_API_KEY": env("ANYMAIL_API_KEY", default=""),
 }
+
+# Channels layer — Redis in prod (REDIS_URL set), in-memory for dev/tests.
+if env("REDIS_URL", default=""):
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": [env("REDIS_URL")]},
+        }
+    }
+else:
+    CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 
 # Profanity filter for comments — comma-separated, extend via env.
 COMMENT_BAD_WORDS = [w.strip() for w in env("COMMENT_BAD_WORDS", default="").split(",") if w.strip()]

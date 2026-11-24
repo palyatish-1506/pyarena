@@ -389,3 +389,31 @@ thundering herd on refresh) before real users do.
 
 **CSV exports:** staff-only `/api/v1/admin/users.csv` +
 `weekly-results.csv` — streaming HttpResponse, no pandas needed.
+
+## 23. Live quiz: WebSockets, ASGI & server-owned timing (Milestone 7)
+
+**HTTP vs WebSocket:** REST is request/response — fine for CRUD. Live quiz
+needs server→client push (new question, reveal, leaderboard) — that's
+WebSocket (`/ws/quiz/<code>/`). One TCP connection, bidirectional JSON.
+
+**ASGI vs WSGI:** gunicorn+WSGI can't do WebSockets. `config/asgi.py`
+now uses `ProtocolTypeRouter`: `http` → Django, `websocket` → URLRouter
+→ `QuizConsumer`. Run with `uvicorn config.asgi:application` or daphne
+(prod start command must change — see ACTION NEEDED).
+
+**Channel layer:** consumers broadcast via `channel_layer.group_send` to
+`quiz_<code>` — all connections in a room get every event. Redis backend
+when `REDIS_URL` set (multi-worker prod), InMemory for dev/tests.
+
+**Server owns the clock:** the consumer schedules reveal at
+`now + time_limit` via `loop.call_later` and scores `LiveQuizAnswer`
+rows against `correct_option_ids` — clients can't cheat timing or see
+answers early (options sent without is_correct).
+
+**Reconnects:** refresh page → reconnect with `?token=<jwt>` → consumer
+re-sends `state` (role, status, leaderboard). Answers are idempotent:
+UNIQUE(participant, question), first answer wins.
+
+**Gotcha hit:** sync ORM inside async consumer methods raises
+`SynchronousOnlyOperation` — wrap in `database_sync_to_async`. Also
+`asyncio.ensure_future` tasks need a strong reference or they get GC'd.
