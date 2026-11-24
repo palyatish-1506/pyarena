@@ -17,7 +17,9 @@ export function LiveQuizCreator() {
     queryFn: () => api.seniorQuestions(),
   });
 
-  const list = Array.isArray(questions) ? questions : (questions as { results?: unknown[] })?.results ?? [];
+  const list = (Array.isArray(questions) ? questions : []) as {
+    id: number; title: string; status: string;
+  }[];
 
   function toggle(id: number) {
     setSelected((prev) => {
@@ -80,14 +82,14 @@ export function LiveQuizCreator() {
       </div>
 
       <div className="max-h-56 space-y-1 overflow-y-auto">
-        {(list as { id: number; title: string; status: string }[]).map((q) => (
+        {list.map((q) => (
           <label key={q.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-surface-50">
             <input type="checkbox" checked={selected.has(q.id)} onChange={() => toggle(q.id)} />
             <span className="flex-1 truncate">{q.title}</span>
             <span className="text-xs text-surface-800/50">{q.status}</span>
           </label>
         ))}
-        {(list as unknown[]).length === 0 && (
+        {list.length === 0 && (
           <p className="text-sm text-surface-800/60">No questions yet — create some first.</p>
         )}
       </div>
