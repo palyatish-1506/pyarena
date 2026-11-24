@@ -17,9 +17,31 @@ export const apiClient = axios.create({
 });
 
 let accessToken: string | null = null;
+let refreshPromise: Promise<string> | null = null;
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
+}
+
+/**
+ * Single-flight refresh: concurrent callers share ONE /auth/refresh/ call.
+ * Without this, page hydration (AuthContext) and a 401 interceptor can
+ * refresh simultaneously — the second uses the just-rotated (blacklisted)
+ * token and kills the session.
+ */
+export function refreshAccessToken(): Promise<string> {
+  if (!refreshPromise) {
+    refreshPromise = apiClient
+      .post<{ access: string }>("/api/v1/auth/refresh/")
+      .then((res) => {
+        setAccessToken(res.data.access);
+        return res.data.access;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
 }
 
 apiClient.interceptors.request.use((config) => {
@@ -40,8 +62,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && config && !config._retried && !isAuthEndpoint) {
       config._retried = true;
       try {
-        const { data } = await apiClient.post<{ access: string }>("/api/v1/auth/refresh/");
-        setAccessToken(data.access);
+        await refreshAccessToken();
         return apiClient.request(config);
       } catch {
         window.dispatchEvent(new Event("pyarena:session-expired"));

@@ -28,6 +28,7 @@ def _no_throttling(settings):
         "user": "100000/hour",
         "login": "100000/min",
         "register": "100000/hour",
+        "submit": "100000/min",
     }
 
 

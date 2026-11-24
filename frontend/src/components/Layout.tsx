@@ -31,6 +31,9 @@ export function Layout() {
                       Senior
                     </NavLink>
                   )}
+                  <NavLink to="/history" className={navLinkClass}>
+                    History
+                  </NavLink>
                   <NavLink to="/profile" className={navLinkClass}>
                     {user.full_name || user.email}
                   </NavLink>

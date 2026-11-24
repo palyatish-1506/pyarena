@@ -19,6 +19,8 @@ export interface User {
   xp: number;
   level: number;
   current_streak: number;
+  longest_streak: number;
+  streak_freezes: number;
   avatar_seed: string;
   date_joined: string;
 }
@@ -216,4 +218,68 @@ export const api = {
     );
     return data;
   },
+
+  // ---- Submissions ----
+  submitAnswer: async (
+    questionId: number,
+    selectedOptionIds: number[],
+    timeTakenMs: number,
+  ): Promise<SubmitResult> => {
+    const { data } = await apiClient.post<SubmitResult>(
+      `/api/v1/questions/${questionId}/submit/`,
+      { selected_option_ids: selectedOptionIds, time_taken_ms: timeTakenMs },
+    );
+    return data;
+  },
+  myHistory: async (page = 1): Promise<HistoryPage> => {
+    const { data } = await apiClient.get<HistoryPage>("/api/v1/me/history/", {
+      params: { page },
+    });
+    return data;
+  },
+  myTopics: async (): Promise<TopicProgress[]> => {
+    const { data } = await apiClient.get<TopicProgress[]>("/api/v1/me/topics/");
+    return data;
+  },
 };
+
+export interface SubmitResult {
+  is_correct: boolean;
+  points_awarded: number;
+  correct_option_ids: number[];
+  explanation: string;
+  new_xp: number;
+  new_level: number;
+  level_name: string;
+  streak: number;
+  badges_earned: string[];
+  is_late: boolean;
+}
+
+export interface HistoryItem {
+  id: number;
+  question: number;
+  question_title: string;
+  topic_name: string;
+  difficulty: string;
+  selected_option_ids: number[];
+  is_correct: boolean;
+  points: number;
+  is_late: boolean;
+  time_taken_ms: number;
+  submitted_at: string;
+}
+
+export interface HistoryPage {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: HistoryItem[];
+}
+
+export interface TopicProgress {
+  topic: string;
+  attempts: number;
+  correct: number;
+  accuracy: number;
+}

@@ -1,5 +1,23 @@
 # Changelog
 
+## [Unreleased] — Milestone 3: Answering, scoring & explanations
+
+### Added
+- Backend: `Submission` model (UNIQUE(user,question)); `submit_answer`
+  service — transaction + select_for_update, exact-set correctness
+  (multi partial = wrong), speed bonus (first 10% of window, +50% max),
+  late=practice (0 pts, streak counts), IST streaks with freezes,
+  XP/level/badges; `POST /api/v1/questions/{id}/submit` (30/min),
+  `GET /api/v1/me/history` (paginated), `GET /api/v1/me/topics`.
+- Frontend: answer flow with live timer, result panel (confetti on
+  correct, explanation markdown, practice-mode label, XP/level/streak),
+  `/history` page, topic progress bars on profile, XP/streak chips on home.
+- Fix: single-flight token refresh (concurrent refresh calls killed sessions).
+- Tests: 13 submission pytest cases incl. speed-bonus edges, late,
+  duplicate 409, multi partial, IST streak + freeze, threaded
+  concurrency (exactly 1 of 2 parallel submits wins); Playwright
+  answer→explanation→XP e2e.
+
 ## [Unreleased] — Milestone 2: Question authoring
 
 ### Added
