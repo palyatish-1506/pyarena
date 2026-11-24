@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, type QuestionPayload, type SeniorQuestion, type Topic } from "../api";
 import { istLocalToUtcIso, utcIsoToIstLocal } from "../lib/time";
 import { CodeBlock } from "../components/CodeBlock";
+import { LiveQuizCreator } from "../components/LiveQuizCreator";
 import { Markdown } from "../components/Markdown";
 
 const inputClass = "w-full rounded-lg border border-surface-200 px-3 py-2 text-sm";
@@ -34,6 +35,8 @@ export function SeniorDashboardPage() {
   return (
     <section className="space-y-6">
       <h1 className="text-2xl font-bold">Senior dashboard</h1>
+
+      <LiveQuizCreator />
 
       <QuestionBuilder
         key={editing?.id ?? "new"}

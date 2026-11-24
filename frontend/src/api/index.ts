@@ -263,6 +263,15 @@ export const api = {
     const { data } = await apiClient.post(`/api/v1/comments/${id}/report/`);
     return data;
   },
+
+  // ---- Live quiz ----
+  createLiveQuiz: async (title: string, questionIds: number[], timeLimit = 20) => {
+    const { data } = await apiClient.post<{ code: string; title: string }>(
+      "/api/v1/live/create/",
+      { title, question_ids: questionIds, time_limit: timeLimit },
+    );
+    return data;
+  },
 };
 
 export interface Comment {
