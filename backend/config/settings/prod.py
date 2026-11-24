@@ -20,6 +20,22 @@ SECURE_HSTS_PRELOAD = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 
+# drf-spectacular can't infer serializers for function-based views —
+# cosmetic schema warnings only, not security issues.
+SILENCED_SYSTEM_CHECKS = ["drf_spectacular.W002"]
+
+# Sentry — disabled unless SENTRY_DSN is set (ACTION NEEDED: create project).
+SENTRY_DSN = env("SENTRY_DSN", default="")  # noqa: F405
+if SENTRY_DSN:
+    import sentry_sdk
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        environment="production",
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+    )
+
 # Require a real SECRET_KEY in production — refuse to boot with the dev default.
 if SECRET_KEY == "dev-insecure-change-me":  # noqa: F405
     raise ImproperlyConfigured("SECRET_KEY must be set via environment variable in production.")

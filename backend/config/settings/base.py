@@ -57,7 +57,31 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "config.middleware.RequestIDMiddleware",
 ]
+
+# Structured request logging + request-id correlation.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "json": {
+            "format": (
+                '{"time":"%(asctime)s","level":"%(levelname)s","logger":"%(name)s",'
+                '"msg":"%(message)s","request_id":"%(request_id)s","method":"%(method)s",'
+                '"path":"%(path)s","status":"%(status)s","user_id":"%(user_id)s"}'
+            ),
+        },
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "json"},
+    },
+    "root": {"handlers": ["console"], "level": "INFO"},
+    "loggers": {
+        "pyarena.request": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "django.request": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+    },
+}
 
 ROOT_URLCONF = "config.urls"
 
