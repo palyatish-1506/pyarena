@@ -40,6 +40,8 @@ export function ProfilePage() {
         )}
       </dl>
 
+      <BadgeGallery />
+
       {topics && topics.length > 0 && (
         <div className="rounded-xl border border-surface-100 bg-white p-5">
           <h2 className="mb-3 text-sm font-semibold">Topic progress</h2>
@@ -64,5 +66,27 @@ export function ProfilePage() {
         </div>
       )}
     </section>
+  );
+}
+
+function BadgeGallery() {
+  const { data: badges } = useQuery({ queryKey: ["my-badges"], queryFn: api.myBadges });
+  if (!badges || badges.length === 0) return null;
+  return (
+    <div className="rounded-xl border border-surface-100 bg-white p-5">
+      <h2 className="mb-3 text-sm font-semibold">Badges ({badges.length})</h2>
+      <div className="flex flex-wrap gap-2">
+        {badges.map((b) => (
+          <div
+            key={b.badge.code}
+            title={b.badge.description}
+            className="flex items-center gap-1.5 rounded-full border border-surface-200 bg-surface-50 px-3 py-1.5 text-sm"
+          >
+            <span>{b.badge.icon}</span>
+            <span className="font-medium">{b.badge.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

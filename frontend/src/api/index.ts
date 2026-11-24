@@ -241,7 +241,42 @@ export const api = {
     const { data } = await apiClient.get<TopicProgress[]>("/api/v1/me/topics/");
     return data;
   },
+  myBadges: async (): Promise<{ badge: { code: string; name: string; icon: string; description: string }; earned_at: string }[]> => {
+    const { data } = await apiClient.get("/api/v1/me/badges/");
+    return data;
+  },
+  comments: async (questionId: number): Promise<{ results: Comment[] }> => {
+    const { data } = await apiClient.get(`/api/v1/questions/${questionId}/comments/`);
+    return data;
+  },
+  postComment: async (questionId: number, body: string, parent?: number): Promise<Comment> => {
+    const { data } = await apiClient.post(`/api/v1/questions/${questionId}/comments/`, {
+      body, parent: parent ?? null,
+    });
+    return data;
+  },
+  upvoteComment: async (id: number) => {
+    const { data } = await apiClient.post(`/api/v1/comments/${id}/upvote/`);
+    return data as { upvotes: number };
+  },
+  reportComment: async (id: number) => {
+    const { data } = await apiClient.post(`/api/v1/comments/${id}/report/`);
+    return data;
+  },
 };
+
+export interface Comment {
+  id: number;
+  author: string;
+  author_id: number;
+  is_senior: boolean;
+  body: string;
+  upvotes: number;
+  is_accepted: boolean;
+  created_at: string;
+  parent: number | null;
+  replies: Comment[];
+}
 
 export interface SubmitResult {
   is_correct: boolean;

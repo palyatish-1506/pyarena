@@ -192,4 +192,7 @@ EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
 ANYMAIL = {
     "BREVO_API_KEY": env("ANYMAIL_API_KEY", default=""),
 }
+
+# Profanity filter for comments — comma-separated, extend via env.
+COMMENT_BAD_WORDS = [w.strip() for w in env("COMMENT_BAD_WORDS", default="").split(",") if w.strip()]
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="PyArena <noreply@pyarena.local>")
