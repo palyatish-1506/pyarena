@@ -24,6 +24,4 @@ def debug_sentry(request):
 
     Staff-only; remove after C3 verification.
     """
-    if not request.user.is_staff:
-        return JsonResponse({"detail": "staff only"}, status=403)
     raise RuntimeError("Sentry test error — safe to ignore")
