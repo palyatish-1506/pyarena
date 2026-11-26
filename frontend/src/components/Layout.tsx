@@ -23,6 +23,9 @@ export function Layout() {
             <NavLink to="/leaderboard" className={navLinkClass}>
               Leaderboard
             </NavLink>
+            <NavLink to="/problems" className={navLinkClass}>
+              Problems
+            </NavLink>
             {!loading &&
               (user ? (
                 <>
