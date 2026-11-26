@@ -6,6 +6,8 @@ import { HomePage } from "./pages/HomePage";
 import { LeaderboardsPage } from "./pages/LeaderboardsPage";
 import { PrivacyPage } from "./pages/PrivacyPage";
 import { LiveQuizPage } from "./pages/LiveQuizPage";
+import { ProblemsPage } from "./pages/ProblemsPage";
+import { CodeProblemPage } from "./pages/CodeProblemPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { ProfilePage } from "./pages/ProfilePage";
@@ -25,6 +27,8 @@ export default function App() {
         <Route path="privacy" element={<PrivacyPage />} />
         <Route path="live/:code" element={<LiveQuizPage />} />
         <Route path="live" element={<LiveQuizPage />} />
+        <Route path="problems" element={<ProblemsPage />} />
+        <Route path="problems/:slug" element={<CodeProblemPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="forgot-password" element={<ForgotPasswordPage />} />
