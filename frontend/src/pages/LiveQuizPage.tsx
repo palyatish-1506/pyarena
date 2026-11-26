@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { apiClient } from "../api/client";
-import { getAccessToken } from "../api/client";
+import { apiClient, getAccessToken, refreshAccessToken } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 
 /** Live quiz player screen (phone) + host controls when is_host. */
@@ -39,10 +38,30 @@ export function LiveQuizPage() {
   const wsRef = useRef<WebSocket | null>(null);
   const startRef = useRef(Date.now());
 
+  const [connStatus, setConnStatus] = useState<"connecting" | "open" | "closed" | "error">("connecting");
+
   useEffect(() => {
     if (!user || !joinCode) return;
-    const token = getAccessToken() ?? "";
-    connect(token);
+    let cancelled = false;
+
+    async function connectWithFreshToken() {
+      // Access tokens expire (~15m) — refresh before connecting so the
+      // consumer doesn't reject us with an expired JWT.
+      let token = getAccessToken() ?? "";
+      try {
+        token = await refreshAccessToken();
+      } catch {
+        /* keep existing token */
+      }
+      if (cancelled) return;
+      connect(token);
+    }
+
+    connectWithFreshToken();
+    return () => {
+      cancelled = true;
+      wsRef.current?.close();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, joinCode]);
 
@@ -52,8 +71,21 @@ export function LiveQuizPage() {
     const base = apiBase
       ? apiBase.replace(/^http/, "ws").replace(/\/$/, "")
       : `${location.protocol === "https:" ? "wss" : "ws"}://${location.hostname}:8000`;
+    setConnStatus("connecting");
     const ws = new WebSocket(`${base}/ws/quiz/${joinCode}/?token=${token}`);
     wsRef.current = ws;
+    ws.onopen = () => setConnStatus("open");
+    ws.onclose = (e) => {
+      setConnStatus(e.code === 4001 || e.code === 4004 ? "error" : "closed");
+      // Auto-reconnect for transient drops; auth failures need re-login.
+      if (e.code !== 4001 && e.code !== 4004) {
+        setTimeout(() => {
+          const t = getAccessToken() ?? "";
+          if (t) connect(t);
+        }, 3000);
+      }
+    };
+    ws.onerror = () => setConnStatus("error");
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data) as QuizMessage;
       setMsg(data);
@@ -147,7 +179,11 @@ export function LiveQuizPage() {
 
       {!q && !finished && (
         <p className="rounded-xl border border-dashed border-surface-200 p-6 text-center text-sm text-surface-800/60">
-          Waiting for the host to start…
+          {connStatus === "open"
+            ? "Waiting for the host to start…"
+            : connStatus === "connecting"
+              ? "Connecting to room…"
+              : "Connection lost — retrying… (check you're logged in)"}
         </p>
       )}
 
