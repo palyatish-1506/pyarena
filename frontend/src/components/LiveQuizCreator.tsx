@@ -36,8 +36,11 @@ export function LiveQuizCreator() {
     try {
       const res = await api.createLiveQuiz(title, [...selected], timeLimit);
       setCode(res.code);
-    } catch {
-      setError("Couldn't create the quiz — make sure you're an approved senior.");
+    } catch (e) {
+      const detail =
+        (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail ??
+        "Couldn't create the quiz.";
+      setError(detail);
     } finally {
       setBusy(false);
     }
