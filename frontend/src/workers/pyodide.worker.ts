@@ -38,29 +38,24 @@ self.onmessage = async (e: MessageEvent) => {
     }
     if (msg.type === "run") {
       const py = await getPyodide();
-      py.globals.set("__stdin_data", msg.stdin ?? "");
-      py.runPython(`
-import sys, io
-_data = __stdin_data.splitlines()
-_idx = [0]
-def _input(prompt=""):
-    if _idx[0] < len(_data):
-        line = _data[_idx[0]]; _idx[0] += 1
-        return line.rstrip("\\n")
-    raise EOFError
-sys.stdin = type("S", (), {"readline": staticmethod(lambda *a: _input() + "\\n"), "read": staticmethod(lambda *a: "\\n".join(_data))})()
-`);
+      // Pyodide's input() uses setStdin, not sys.stdin — feed lines directly.
+      const pyapi = py as unknown as {
+        setStdin(o: { stdin: () => string | null }): void;
+        setStdout(o: { batched: (s: string) => void }): void;
+        setStderr(o: { batched: (s: string) => void }): void;
+      };
+      const lines = (msg.stdin ?? "").split("\n");
+      let idx = 0;
       let stdout = "", stderr = "", error = "";
+      pyapi.setStdin({ stdin: () => (idx < lines.length ? lines[idx++] : null) });
+      pyapi.setStdout({ batched: (s) => (stdout += s) });
+      pyapi.setStderr({ batched: (s) => (stderr += s) });
       try {
         await py.runPythonAsync(msg.code);
       } catch (err) {
         error = String((err as Error)?.message ?? err);
       }
-      const sys = py.globals.get("sys") as { stdout: { getvalue(): string }; stderr: { getvalue(): string } };
-      stdout = sys.stdout.getvalue();
-      stderr = sys.stderr.getvalue();
       if (error && !stderr) stderr = error;
-      py.runPython(`import sys; sys.stdout, sys.stderr = sys.__stdout__, sys.__stderr__`);
       self.postMessage({ type: "result", stdout, stderr });
     }
   } catch (err) {
