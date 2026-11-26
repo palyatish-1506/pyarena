@@ -27,3 +27,16 @@ class RequestIDMiddleware:
             },
         )
         return response
+
+
+class DefaultLogRecordFilter(logging.Filter):
+    """Inject empty defaults for request-scoped fields so non-request log
+    records (daphne, asyncio, etc.) don't crash the JSON formatter."""
+
+    FIELDS = ("request_id", "method", "path", "status", "user_id")
+
+    def filter(self, record):
+        for f in self.FIELDS:
+            if not hasattr(record, f):
+                setattr(record, f, "")
+        return True

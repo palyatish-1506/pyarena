@@ -74,8 +74,15 @@ LOGGING = {
             ),
         },
     },
+    "filters": {
+        "log_defaults": {"()": "config.middleware.DefaultLogRecordFilter"},
+    },
     "handlers": {
-        "console": {"class": "logging.StreamHandler", "formatter": "json"},
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "json",
+            "filters": ["log_defaults"],
+        },
     },
     "root": {"handlers": ["console"], "level": "INFO"},
     "loggers": {
