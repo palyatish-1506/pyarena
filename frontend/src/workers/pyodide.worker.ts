@@ -56,8 +56,9 @@ sys.stdin = type("S", (), {"readline": staticmethod(lambda *a: _input() + "\\n")
       } catch (err) {
         error = String((err as Error)?.message ?? err);
       }
-      stdout = py.globals.get("sys").stdout.getvalue();
-      stderr = py.globals.get("sys").stderr.getvalue();
+      const sys = py.globals.get("sys") as { stdout: { getvalue(): string }; stderr: { getvalue(): string } };
+      stdout = sys.stdout.getvalue();
+      stderr = sys.stderr.getvalue();
       if (error && !stderr) stderr = error;
       py.runPython(`import sys; sys.stdout, sys.stderr = sys.__stdout__, sys.__stderr__`);
       self.postMessage({ type: "result", stdout, stderr });
