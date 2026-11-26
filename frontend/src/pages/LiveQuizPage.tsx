@@ -47,10 +47,11 @@ export function LiveQuizPage() {
   }, [user, joinCode]);
 
   function connect(token: string) {
-    // WS base: VITE_WS_URL if set (prod), else dev backend on :8000.
-    const base =
-      import.meta.env.VITE_WS_URL ??
-      `${location.protocol === "https:" ? "wss" : "ws"}://${location.hostname}:8000`;
+    // WS base: derive from VITE_API_BASE_URL (https→wss), fallback dev :8000.
+    const apiBase = import.meta.env.VITE_API_BASE_URL as string | undefined;
+    const base = apiBase
+      ? apiBase.replace(/^http/, "ws").replace(/\/$/, "")
+      : `${location.protocol === "https:" ? "wss" : "ws"}://${location.hostname}:8000`;
     const ws = new WebSocket(`${base}/ws/quiz/${joinCode}/?token=${token}`);
     wsRef.current = ws;
     ws.onmessage = (e) => {
