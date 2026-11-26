@@ -35,7 +35,7 @@ export function CodeProblemPage() {
   useEffect(() => {
     if (!problem || !hostRef.current || viewRef.current) return;
     setCode(problem.starter_code);
-    const worker = new Worker(new URL("../workers/pyodide.worker.ts", import.meta.url), { type: "module" });
+    const worker = new Worker(new URL("../workers/pyodide.worker.ts", import.meta.url), );
     workerRef.current = worker;
     worker.onmessage = (e) => {
       if (e.data.type === "result") {
@@ -67,7 +67,7 @@ export function CodeProblemPage() {
       const timer = setTimeout(() => {
         // C1: kill runaway code — terminate worker, spin up a fresh one.
         w.terminate();
-        const fresh = new Worker(new URL("../workers/pyodide.worker.ts", import.meta.url), { type: "module" });
+        const fresh = new Worker(new URL("../workers/pyodide.worker.ts", import.meta.url), );
         workerRef.current = fresh;
         fresh.onmessage = (e) => {
           if (e.data.type === "result") { setStdout(e.data.stdout); setStderr(e.data.stderr); setBusy(false); }
