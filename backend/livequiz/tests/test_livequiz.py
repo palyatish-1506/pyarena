@@ -88,6 +88,19 @@ class LiveQuizFlowTest(TransactionTestCase):
             # Players answer: p1 correct, p2 wrong.
             await c1.send_json_to({"action": "answer", "option_ids": [correct1.id], "time_taken_ms": 2000})
             await c2.send_json_to({"action": "answer", "option_ids": [999999], "time_taken_ms": 5000})
+            # Answers travel on separate WS connections — wait until both
+            # LiveQuizAnswer rows actually exist before revealing.
+            from livequiz.models import LiveQuizAnswer
+
+            for _ in range(50):
+                n = await database_sync_to_async(
+                    lambda: LiveQuizAnswer.objects.filter(quiz=quiz).count()
+                )()
+                if n >= 2:
+                    break
+                import asyncio
+
+                await asyncio.sleep(0.1)
             # Host reveals manually (deterministic in tests; auto-timer
             # covers production timing).
             await hc.send_json_to({"action": "reveal"})
