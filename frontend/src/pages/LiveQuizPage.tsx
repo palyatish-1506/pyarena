@@ -91,6 +91,7 @@ export function LiveQuizPage() {
       setMsg(data);
       if (data.event === "question") {
         setSelected([]);
+        setAnswered(false);
         startRef.current = Date.now();
       }
       if (data.event === "state" || data.event === "finished") {
@@ -103,8 +104,12 @@ export function LiveQuizPage() {
     wsRef.current?.send(JSON.stringify({ action, ...extra }));
   }
 
+  const [answered, setAnswered] = useState(false);
+
   function answer() {
+    if (answered || selected.length === 0) return;
     send("answer", { option_ids: selected, time_taken_ms: Date.now() - startRef.current });
+    setAnswered(true);
   }
 
   if (!user) return <p className="p-6">Log in to join a live quiz.</p>;
@@ -171,8 +176,12 @@ export function LiveQuizPage() {
               </button>
             ))}
           </div>
-          <button onClick={answer} disabled={selected.length === 0} className="rounded-lg bg-primary-600 px-6 py-2 font-medium text-white disabled:opacity-40">
-            Lock answer
+          <button
+            onClick={answer}
+            disabled={selected.length === 0 || answered}
+            className="rounded-lg bg-primary-600 px-6 py-2 font-medium text-white disabled:opacity-40"
+          >
+            {answered ? "✓ Answer locked in" : "Lock answer"}
           </button>
         </div>
       )}
