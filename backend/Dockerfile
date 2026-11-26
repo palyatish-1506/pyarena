@@ -20,5 +20,7 @@ RUN SECRET_KEY=build-time-dummy DJANGO_SETTINGS_MODULE=config.settings.prod \
 
 EXPOSE 8000
 
-# Apply migrations, then serve. migrate is idempotent — safe on every boot.
-CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3"]
+# Apply migrations, then serve via ASGI (daphne) for HTTP + WebSockets.
+# migrate is idempotent — safe on every boot. Render's Docker Command
+# override must keep the migrate step (see render notes).
+CMD ["sh", "-c", "python manage.py migrate --noinput && daphne -b 0.0.0.0 -p ${PORT:-8000} config.asgi:application"]
