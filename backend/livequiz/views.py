@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from questions.services import visible_to_students
+from questions.models import Question
 
 from .models import LiveQuiz, LiveQuizParticipant
 
@@ -25,9 +25,11 @@ def create(request):
         return Response({"detail": "Seniors only."}, status=403)
     s = CreateQuizSerializer(data=request.data)
     s.is_valid(raise_exception=True)
-    qs = list(visible_to_students().filter(id__in=s.validated_data["question_ids"]))
+    # Seniors may quiz on any existing question — scheduled/draft included
+    # (they authored it; visibility rules apply to students, not the host).
+    qs = list(Question.objects.filter(id__in=s.validated_data["question_ids"]))
     if len(qs) != len(s.validated_data["question_ids"]):
-        return Response({"detail": "Some questions are not visible/published."}, status=400)
+        return Response({"detail": "Some question IDs do not exist."}, status=400)
     quiz = LiveQuiz.create(request.user, s.validated_data["title"], qs, s.validated_data["time_limit"])
     return Response({"code": quiz.code, "title": quiz.title}, status=201)
 
