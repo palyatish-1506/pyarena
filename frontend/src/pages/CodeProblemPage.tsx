@@ -25,7 +25,10 @@ export function CodeProblemPage() {
   const [stdout, setStdout] = useState("");
   const [stderr, setStderr] = useState("");
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<{
+    status: string; score: number; points_possible: number;
+    error_hint: string; flagged_similar: boolean; message: string;
+  } | null>(null);
   const [testResults, setTestResults] = useState<{ input: string; expected: string; actual: string; passed: boolean }[]>([]);
 
   // Lazy-init worker + editor once problem loads.

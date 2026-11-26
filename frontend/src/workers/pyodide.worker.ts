@@ -7,15 +7,20 @@
 declare const importScripts: (...urls: string[]) => void;
 
 const PYODIDE_CDN = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/";
-let pyodide: any = null;
-let loading: Promise<any> | null = null;
+interface Pyodide {
+  globals: { set(k: string, v: unknown): void; get(k: string): unknown };
+  runPython(code: string): void;
+  runPythonAsync(code: string): Promise<void>;
+}
+let pyodide: Pyodide | null = null;
+let loading: Promise<Pyodide> | null = null;
 
 async function getPyodide() {
   if (pyodide) return pyodide;
   if (!loading) {
     loading = (async () => {
       importScripts(`${PYODIDE_CDN}pyodide.js`);
-      const load = (self as any).loadPyodide;
+      const load = (self as unknown as { loadPyodide: (o: { indexURL: string }) => Promise<Pyodide> }).loadPyodide;
       pyodide = await load({ indexURL: PYODIDE_CDN });
       return pyodide;
     })();
@@ -48,8 +53,8 @@ sys.stdin = type("S", (), {"readline": staticmethod(lambda *a: _input() + "\\n")
       let stdout = "", stderr = "", error = "";
       try {
         await py.runPythonAsync(msg.code);
-      } catch (err: any) {
-        error = String(err?.message ?? err);
+      } catch (err) {
+        error = String((err as Error)?.message ?? err);
       }
       stdout = py.globals.get("sys").stdout.getvalue();
       stderr = py.globals.get("sys").stderr.getvalue();
@@ -57,7 +62,7 @@ sys.stdin = type("S", (), {"readline": staticmethod(lambda *a: _input() + "\\n")
       py.runPython(`import sys; sys.stdout, sys.stderr = sys.__stdout__, sys.__stderr__`);
       self.postMessage({ type: "result", stdout, stderr });
     }
-  } catch (err: any) {
-    self.postMessage({ type: "error", stderr: String(err?.message ?? err) });
+  } catch (err) {
+    self.postMessage({ type: "error", stderr: String((err as Error)?.message ?? err) });
   }
 };
