@@ -235,9 +235,7 @@ class QuizConsumer(AsyncJsonWebsocketConsumer):
         from livequiz.models import LiveQuizAnswer
 
         try:
-            participant, _ = LiveQuizParticipant.objects.get_or_create(
-                quiz_id=quiz_id, user=self.user
-            )
+            participant, _ = LiveQuizParticipant.objects.get_or_create(quiz_id=quiz_id, user=self.user)
             LiveQuizAnswer.objects.create(
                 quiz_id=quiz_id,
                 participant=participant,

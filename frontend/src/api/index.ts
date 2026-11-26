@@ -272,6 +272,34 @@ export const api = {
     );
     return data;
   },
+
+  // ---- Code practice ----
+  codeProblems: async () => {
+    const { data } = await apiClient.get("/api/v1/problems/");
+    return data as {
+      id: number; slug: string; title: string; description_markdown: string;
+      starter_code: string; difficulty: string; points: number;
+      time_limit_ms: number; visible_tests: { id: number; input: string }[];
+      hidden_test_count: number;
+    }[];
+  },
+  codeProblem: async (slug: string) => {
+    const { data } = await apiClient.get(`/api/v1/problems/${slug}/`);
+    return data as {
+      id: number; slug: string; title: string; description_markdown: string;
+      starter_code: string; difficulty: string; points: number;
+      visible_tests: { id: number; input: string; expected_output: string }[];
+      hidden_test_count: number;
+    };
+  },
+  submitCode: async (slug: string, code: string) => {
+    const { data } = await apiClient.post(`/api/v1/problems/${slug}/submit/`, { code });
+    return data as {
+      status: string; score: number; points_possible: number;
+      results: { input: string; expected: string; actual: string; stderr: string; passed: boolean; hidden: boolean }[];
+      error_hint: string; flagged_similar: boolean; message: string;
+    };
+  },
 };
 
 export interface Comment {

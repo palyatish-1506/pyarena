@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "submissions",
     "leaderboard",
     "livequiz",
+    "codepractice",
     "gamification",
     "community",
 ]

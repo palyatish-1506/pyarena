@@ -417,3 +417,31 @@ UNIQUE(participant, question), first answer wins.
 **Gotcha hit:** sync ORM inside async consumer methods raises
 `SynchronousOnlyOperation` — wrap in `database_sync_to_async`. Also
 `asyncio.ensure_future` tasks need a strong reference or they get GC'd.
+
+## 24. In-browser Python & untrusted code execution (Milestone 8)
+
+**WebAssembly:** Pyodide compiles CPython to WASM — real Python runs in
+the browser. We load it lazily inside a Web Worker so the ~10MB WASM +
+startup never blocks the UI thread. A 5s watchdog terminates the worker
+on infinite loops (C1) and spins up a fresh one.
+
+**Never execute student code on our server:** arbitrary code on our
+process = RCE risk. Execution is sandboxed twice:
+- Practice: Pyodide WASM in the browser (can't touch our infra)
+- Grading: Piston API — isolated containers, time+memory limits
+
+**Why we don't trust the client:** the browser CAN run visible tests for
+instant feedback, but points come ONLY from server-side grading that
+includes hidden test cases the client never sees. Client-side "all pass"
+is meaningless — they could fake the result.
+
+**Judge choice:** Piston (free public API, no key) for launch. Judge0
+self-hosted needs a paid Render service (~$7/mo private service); Judge0
+Cloud costs per-request. For 450 students Piston's free tier is enough;
+upgrade path documented in RUNBOOK.
+
+**Similarity flagging:** difflib ratio >= 0.92 vs other submissions flags
+for senior review — flag only, never auto-punish (false positives happen).
+
+**Error explainer:** maps traceback exception names to beginner hints —
+teaches debugging vocabulary, not just pass/fail.

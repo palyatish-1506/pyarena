@@ -3,6 +3,7 @@
 Order matters: get_asgi_application() runs django.setup(), so the
 websocket URLconf (which imports models) must be imported AFTER it.
 """
+
 import os
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.prod")
