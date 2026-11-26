@@ -235,15 +235,18 @@ class QuizConsumer(AsyncJsonWebsocketConsumer):
         from livequiz.models import LiveQuizAnswer
 
         try:
+            participant, _ = LiveQuizParticipant.objects.get_or_create(
+                quiz_id=quiz_id, user=self.user
+            )
             LiveQuizAnswer.objects.create(
                 quiz_id=quiz_id,
-                participant=LiveQuizParticipant.objects.get(quiz_id=quiz_id, user=self.user),
+                participant=participant,
                 question_id=question_id,
                 selected_option_ids=sorted(set(option_ids)),
                 time_taken_ms=min(int(time_taken), 600_000),
             )
         except Exception:
-            pass  # duplicate or missing participant — ignore
+            pass  # duplicate answer — first one wins
 
     # ---------- sync helpers ----------
     @database_sync_to_async
